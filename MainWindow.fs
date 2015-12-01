@@ -96,7 +96,7 @@ open System.IO
 
         let loadConfig() =
             let materialList = [| new Material(0.2, 0.2, 0.3, 0.2) ; new Material(0.75, 0.5, 1.2, 0.05) ; new Material(0.01, 0.01, 0.25, 0.99); |]
-            let mutable bodies = []
+            let mutable bodies = [||]
 
             let data = (ParseIni.loadConfig(sceneBox.ActiveText))
 
@@ -132,7 +132,7 @@ open System.IO
                 let newRectangle = new Collapse.Rectangle(new Vector2D(0.0, 0.0), new Vector2D(!width, !height))
                 let newBody = new Body(newRectangle, !mass, materialList.[!material], pos = new Vector2D(!posX, !posY), vel = new Vector2D(!velX, !velY), immo = !immovable, col = !color, nm = !name)
 
-                bodies <- newBody::bodies
+                bodies <- Array.append bodies [| newBody |]
 
 
             bodies

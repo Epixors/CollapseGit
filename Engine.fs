@@ -6,14 +6,29 @@ open Gtk
 open FSharp.Charting
 open System.Collections.Generic
 
+type Pair =
+    struct
+        val A:Body
+        val B:Body
+        new(a:Body, b:Body) = { A = a; B = b; }
+    end
+
+
 //The engine stores the bodies and governs all steps taken to modify them
-type Engine(bs:Body list, stopAt:float, txtBox:TextView) = 
+type Engine(bs:Body array, stopAt:float, txtBox:TextView) = 
     let mutable bods = bs //List containing the bodies to be manipulated
     let timestep = 0.02 //dt
     let mutable currentTime = 0.0 //Starting point in time
     let physics = new Physics(timestep)
     let collision = new Collision()
     let timeStart = System.DateTime.Now
+
+    let mutable pairs = [||]
+    
+    do bods |> Array.iter(fun b -> (for b2 in bods do if b2 <> b then pairs <- Array.append pairs [|(new Pair(b, b2))|]))
+
+    let sortedPairs =  (pairs |> Seq.ofArray |> Seq.distinctBy (fun elem -> new Pair(elem.B, elem.A)) |> Array.ofSeq)
+
 
     //Write to the TextView in the Control Panel
     let Log s =
@@ -25,14 +40,14 @@ type Engine(bs:Body list, stopAt:float, txtBox:TextView) =
     let mutable drewCharts = false
     let velocityData = new Dictionary<string, (float * float) list>()
 
-    do bods |> List.iter(fun b -> if b.name <> "None" then velocityData.Add(b.name, [(currentTime, b.velocity.length());])) 
+    do bods |> Array.iter(fun b -> if b.name <> "None" then velocityData.Add(b.name, [(currentTime, b.velocity.length());])) 
 
     //Move the simulation forward timestep seconds
     member this.step() =
 
         if drewCharts <> true then
             //Add velocity data to the bodies that are being logged
-            bods |> List.iter(fun b -> if b.name <> "None" then velocityData.Item(b.name) <- velocityData.Item(b.name) @ [(currentTime, b.velocity.length());] )    
+            bods |> Array.iter(fun b -> if b.name <> "None" then velocityData.Item(b.name) <- velocityData.Item(b.name) @ [(currentTime, b.velocity.length());] )    
 
             if currentTime > stopTime then
                 Log("It took " + (System.DateTime.Now - timeStart).ToString() + " to simulate " + stopTime.ToString() + " seconds at dt = " + timestep.ToString())
@@ -43,9 +58,9 @@ type Engine(bs:Body list, stopAt:float, txtBox:TextView) =
                     //Display the chart in a new window
                     (Chart.Line(dataToPrint, Title = name, XTitle = "Time (s)", YTitle = "Speed (m/s)")).ShowChart()
 
-        bods |> List.iter(fun b -> physics.applyGravity(b))
-        bods |> List.iter(fun b -> (for b2 in bods do collision.ResolveCollision(b2,b)))
-        bods |> List.iter(fun b -> physics.translateBody(b))
+        bods |> Array.iter(fun b -> physics.applyGravity(b))
+        sortedPairs |> Array.iter(fun p -> collision.ResolveCollision(p.A, p.B))
+        bods |> Array.iter(fun b -> physics.translateBody(b))
         currentTime <- currentTime + timestep
 
     //Returns the bodies the engine is processing
@@ -54,4 +69,4 @@ type Engine(bs:Body list, stopAt:float, txtBox:TextView) =
     //Add another body
     member this.addBody(b:Body) =
         if b.name <> "None" then velocityData.Add(b.name, [(currentTime, b.velocity.length());]) 
-        bods <- b::bods
+        bods <- Array.append bods [| b |]
