@@ -1,0 +1,17 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{f2a71f9b-5d33-465a-a702-920d77279786}") = "Collapse", "Collapse.fsproj", "{959254D3-D725-4FBC-BE8B-E24EA1DF74DC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x86 = Debug|x86
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{959254D3-D725-4FBC-BE8B-E24EA1DF74DC}.Debug|x86.ActiveCfg = Debug|x86
+		{959254D3-D725-4FBC-BE8B-E24EA1DF74DC}.Debug|x86.Build.0 = Debug|x86
+		{959254D3-D725-4FBC-BE8B-E24EA1DF74DC}.Release|x86.ActiveCfg = Release|x86
+		{959254D3-D725-4FBC-BE8B-E24EA1DF74DC}.Release|x86.Build.0 = Release|x86
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,9 @@
+/home/pws1/Documents/CollapseGit/obj/x86/Debug/.NETFramework,Version=v4.0.AssemblyAttribute.fs
+/home/pws1/Documents/CollapseGit/bin/Debug/Collapse.exe
+/home/pws1/Documents/CollapseGit/obj/x86/Debug/Collapse.exe
+/home/pws1/Documents/CollapseGit/bin/Debug/OpenTK.dll
+/home/pws1/Documents/CollapseGit/bin/Debug/FSharp.Charting.Gtk.dll
+/home/pws1/Documents/CollapseGit/bin/Debug/OxyPlot.dll
+/home/pws1/Documents/CollapseGit/bin/Debug/OxyPlot.GtkSharp.dll
+/home/pws1/Documents/CollapseGit/bin/Debug/Collapse.exe.mdb
+/home/pws1/Documents/CollapseGit/obj/x86/Debug/Collapse.exe.mdb

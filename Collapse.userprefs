@@ -1,0 +1,22 @@
+﻿<Properties StartupItem="Collapse.fsproj">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug|x86" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Engine.fs">
+    <Files>
+      <File FileName="Collision.fs" Line="30" Column="33" />
+      <File FileName="Vector2D.fs" Line="27" Column="39" />
+      <File FileName="Engine.fs" Line="34" Column="16" />
+      <File FileName="MainWindow.fs" Line="135" Column="60" />
+      <File FileName="Body.fs" Line="19" Column="14" />
+      <File FileName="AssemblyInfo.fs" Line="11" Column="33" />
+      <File FileName="Main.fs" Line="13" Column="1" />
+      <File FileName="ParseIni.fs" Line="24" Column="23" />
+      <File FileName="Physics.fs" Line="1" Column="1" />
+      <File FileName="Manifold.fs" Line="40" Column="34" />
+      <File FileName="Materials.fs" Line="1" Column="1" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+</Properties>
