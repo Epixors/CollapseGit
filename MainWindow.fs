@@ -12,12 +12,12 @@ open System.IO
     type Materials = Metal=0 | Wood=1 | Bouncy=2
 
     //Window where simulation is rendered
-    type Renderer(width, height, mode, title, options, txtBox:TextView, scene) = 
+    type Renderer(width, height, mode, title, options, txtBox:TextView, scene, timestep, scale:float, endSimTime) = 
         inherit GameWindow(width, height, mode, title, options)
 
         let materialList = [| new Material(0.2, 0.2, 0.3, 0.2) ; new Material(0.75, 0.5, 1.2, 0.05) ; new Material(0.01, 0.01, 0.25, 0.99); |]
 
-        let engine = new Engine(scene, 30.0, txtBox)
+        let engine = new Engine(scene, endSimTime, timestep, txtBox)
 
 
         //Write to the TextView in the Control Panel
@@ -28,22 +28,35 @@ open System.IO
         let drawRectangle(b:Body) =
             let rectShape = b.shape :?> Collapse.Rectangle
 
-            let p = b.position
-            let min = rectShape.min + p
-            let max = rectShape.max + p
+            let p = b.position - new Vector2D((rectShape.max.x - rectShape.min.x) / 2.0, (rectShape.max.y - rectShape.min.y) / 2.0)
+            let min = (rectShape.min + p) * scale
+            let max = (rectShape.max + p) * scale
+
+
+            GL.Begin(BeginMode.Quads)
+           
+            GL.Color3(b.borderColor)
+
+            let borderSize = 1.0
+
+            GL.Vertex2(min.x - borderSize, min.y - borderSize)
+            GL.Vertex2(min.x - borderSize, max.y + borderSize)
+            GL.Vertex2(max.x + borderSize, max.y + borderSize)
+            GL.Vertex2(max.x + borderSize, min.y - borderSize)
+
+            GL.End()
+
 
             GL.Begin(BeginMode.Quads)
 
             GL.Color3(b.color)
 
-            GL.Vertex2(min.x, min.y)
-            GL.Vertex2(min.x, max.y)
-            GL.Vertex2(max.x, max.y)
-            GL.Vertex2(max.x, min.y)
+            GL.Vertex2(min.x + borderSize, min.y + borderSize)
+            GL.Vertex2(min.x + borderSize, max.y - borderSize)
+            GL.Vertex2(max.x - borderSize, max.y - borderSize)
+            GL.Vertex2(max.x - borderSize, min.y + borderSize)
 
             GL.End()
-
-
 
         //Enable VSync to prevent screen tearing
         do base.VSync <- VSyncMode.On
@@ -89,6 +102,27 @@ open System.IO
         let txtBox = new TextView()
         txtBox.Editable <- false
 
+        let settingBox = new HBox()
+        let timeStepSelect = new SpinButton(1.0,60.0,0.1)
+        let timeStepSelectLabel = new Label("Timestep (s)")
+        timeStepSelect.Value <- 60.0
+
+
+        let endSimSelect = new SpinButton(1.0, 300.0, 1.0)
+        endSimSelect.Value <- 10.0
+        let endSimSelectLabel = new Label("End sim (s)")
+        
+        let scaleSelect = new SpinButton(1.0, 100.0, 1.0)
+        scaleSelect.Value <- 100.0
+        let scaleSelectLabel = new Label("Scale")
+
+        settingBox.Add(timeStepSelectLabel)
+        settingBox.Add(timeStepSelect)
+        settingBox.Add(endSimSelectLabel)
+        settingBox.Add(endSimSelect)
+        settingBox.Add(scaleSelectLabel)
+        settingBox.Add(scaleSelect)
+
         let Log s =
             let iter = txtBox.Buffer.StartIter
             txtBox.Buffer.Insert((ref iter), "[" + System.DateTime.UtcNow.ToString("HH : mm : ss : ffff") + "] " + s + "\n")
@@ -118,19 +152,21 @@ open System.IO
                     match (fst s) with
                         | "mass" -> mass := (float)(snd s)
                         | "immovable" -> immovable := if (snd s) <> "false" then true else false
-                        | "positionX" -> posX := (float)(snd s)
-                        | "positionY" -> posY := (float)(snd s)
-                        | "width" -> width := (float)(snd s)
-                        | "height" -> height := (float)(snd s)
+                        | "positionX" -> posX := (float)(snd s) / 100.0
+                        | "positionY" -> posY := (float)(snd s) / 100.0
+                        | "width" -> width := (float)(snd s) / 100.0
+                        | "height" -> height := (float)(snd s) / 100.0
                         | "material" -> material := (int)(snd s)
                         | "color" -> color := Color.FromName((snd s))
                         | "name" -> name := (snd s)
-                        | "velocityX" -> velX := (float)(snd s)
-                        | "velocityY" -> velY := (float)(snd s)
+                        | "velocityX" -> velX := (float)(snd s) / 100.0
+                        | "velocityY" -> velY := (float)(snd s) / 100.0
                 ))
 
+
+
                 let newRectangle = new Collapse.Rectangle(new Vector2D(0.0, 0.0), new Vector2D(!width, !height))
-                let newBody = new Body(newRectangle, !mass, materialList.[!material], pos = new Vector2D(!posX, !posY), vel = new Vector2D(!velX, !velY), immo = !immovable, col = !color, nm = !name)
+                let newBody = new Body(newRectangle, !mass, materialList.[!material], pos = new Vector2D(!posX + !width/2.0, !posY + !height/2.0), vel = new Vector2D(!velX, !velY), immo = !immovable, col = !color, nm = !name)
 
                 bodies <- Array.append bodies [| newBody |]
 
@@ -142,7 +178,7 @@ open System.IO
             async{
                 if b then
                     let c = loadConfig()
-                    use renderer = new Renderer(1280, 1024, Graphics.GraphicsMode.Default, "Collapse Engine - Renderer" , GameWindowFlags.Default, txtBox, c)
+                    use renderer = new Renderer(1280, 1024, Graphics.GraphicsMode.Default, "Collapse Engine - Renderer" , GameWindowFlags.Default, txtBox, c, timeStepSelect.Value, scaleSelect.Value, endSimSelect.Value)
                     do renderer.Run()
                 }
 
@@ -157,8 +193,10 @@ open System.IO
             do this.DeleteEvent.AddHandler(fun o e -> this.OnDeleteEvent(o,e))
             do box.PackStart(btnStart, false, false, (uint32 0))
             do box.PackStart(sceneBox, false, false, (uint32 0))
+            do box.PackStart(settingBox, false, false, (uint32 0))
             do box.PackStart(txtBox, true, true, (uint32 5))
             do this.Add(box)
+
 
             //Show the starting message
             do ["Hola!"; "To begin, select a scene" ; "Press Start to start simulating a scene" ; "Currently loaded: Default Scene"] |> List.iter(fun s -> Log s)

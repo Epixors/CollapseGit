@@ -10,6 +10,11 @@ type Physics(deltatime:float) =
     member this.applyGravity(b:Body) =
         b.addForce(new Vector2D(0.0, b.mass * -9.81))
 
+    member this.applyAirFriction(b:Body) =
+        let rect = b.shape :?> Collapse.Rectangle
+        b.addForce(new Vector2D(0.0, 0.5*1.293*1.05 * (rect.max.x - rect.min.x) * b.velocity.y ** 2.0))
+        b.addForce(new Vector2D(0.0, 0.5*1.293*1.05 * (rect.max.y - rect.min.y) * b.velocity.x ** 2.0))
+
     //Move the body according to the forces acting on it
     member this.translateBody(b:Body) =
         if b.immovable <> true then

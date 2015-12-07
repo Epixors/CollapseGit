@@ -20,7 +20,6 @@
     <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
-    <DebugSymbols>false</DebugSymbols>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release</OutputPath>
     <ErrorReport>prompt</ErrorReport>
@@ -29,10 +28,31 @@
     <PlatformTarget>x86</PlatformTarget>
     <DefineConstants>
     </DefineConstants>
+    <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
+  <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\4.0\Framework\v4.0\Microsoft.FSharp.Targets" />
   <ItemGroup>
+    <Compile Include="AssemblyInfo.fs" />
+    <Compile Include="Vector2D.fs" />
+    <Compile Include="Shape.fs" />
+    <Compile Include="Materials.fs" />
+    <Compile Include="Body.fs" />
+    <Compile Include="Manifold.fs" />
+    <Compile Include="Collision.fs" />
+    <Compile Include="Physics.fs" />
+    <Compile Include="Engine.fs" />
+    <Compile Include="ParseIni.fs" />
+    <Compile Include="MainWindow.fs" />
+    <Compile Include="Main.fs" />
+    <None Include="packages.config" />
+    <Content Include="app.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="FSharp.Core">
+      <HintPath>packages\FSharp.Core.4.0.0.1\lib\net40\FSharp.Core.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="mscorlib" />
-    <Reference Include="FSharp.Core, Version=4.3.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="gtk-sharp, Version=2.4.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f">
@@ -40,6 +60,7 @@
     </Reference>
     <Reference Include="gdk-sharp, Version=2.4.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f">
       <SpecificVersion>False</SpecificVersion>
+      <Private>True</Private>
     </Reference>
     <Reference Include="glib-sharp, Version=2.4.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f">
       <SpecificVersion>False</SpecificVersion>
@@ -55,6 +76,7 @@
     </Reference>
     <Reference Include="OpenTK">
       <HintPath>..\packages\OpenTK.1.1.1589.5942\lib\NET40\OpenTK.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System.Drawing" />
     <Reference Include="FSharp.Charting.Gtk">
@@ -66,24 +88,5 @@
     <Reference Include="OxyPlot.GtkSharp">
       <HintPath>packages\FSharp.Charting.Gtk.0.90.12\lib\net40\OxyPlot.GtkSharp.dll</HintPath>
     </Reference>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="AssemblyInfo.fs" />
-    <Compile Include="Math.fs" />
-    <Compile Include="Vector2D.fs" />
-    <Compile Include="Shape.fs" />
-    <Compile Include="Materials.fs" />
-    <Compile Include="Body.fs" />
-    <Compile Include="Manifold.fs" />
-    <Compile Include="Collision.fs" />
-    <Compile Include="Physics.fs" />
-    <Compile Include="Engine.fs" />
-    <Compile Include="ParseIni.fs" />
-    <Compile Include="MainWindow.fs" />
-    <Compile Include="Main.fs" />
-  </ItemGroup>
-  <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\4.0\Framework\v4.0\Microsoft.FSharp.Targets" />
-  <ItemGroup>
-    <None Include="packages.config" />
   </ItemGroup>
 </Project>

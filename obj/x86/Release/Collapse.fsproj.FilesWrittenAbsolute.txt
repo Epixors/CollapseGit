@@ -1,0 +1,4 @@
+/home/pws1/Documents/CollapseGit/obj/x86/Release/.NETFramework,Version=v4.0.AssemblyAttribute.fs
+/home/pws1/Documents/CollapseGit/bin/Release/FSharp.Charting.Gtk.dll
+/home/pws1/Documents/CollapseGit/bin/Release/OxyPlot.dll
+/home/pws1/Documents/CollapseGit/bin/Release/OxyPlot.GtkSharp.dll

@@ -6,8 +6,10 @@ open System.Drawing
 
 //Stores information about a body and allows manipulation of the body
 type Body(sh:Shape, ma:float, mat:Material, ?pos:Vector2D, ?vel:Vector2D, ?immo:bool, ?col:Color, ?nm:string) = 
-    let s = sh //Shape
+    let rnd = new Random()
+    let s = sh :?> Collapse.Rectangle //Shape
     let clr = defaultArg col Color.White //Color
+    let bClr = Color.FromArgb(255, rnd.Next(0, 255), rnd.Next(0, 255), rnd.Next(0,255))
     let m = ma //Mass
     let e = mat.restitution //Restitution
     let mate = mat
@@ -19,7 +21,7 @@ type Body(sh:Shape, ma:float, mat:Material, ?pos:Vector2D, ?vel:Vector2D, ?immo:
          else
             1.0/m //Inverse mass is calculated as it's often used in physics calculations
 
-    let mutable p = defaultArg pos (new Vector2D(0.0, 0.0)) //Stores the position in the scene
+    let mutable p = defaultArg pos (new Vector2D((s.max.x - s.min.x)/2.0, (s.max.y - s.min.y)/2.0)) //Stores the position in the scene
     let mutable v = defaultArg vel (new Vector2D(0.0, 0.0)) //Stores the body's velocity
     let mutable f = [] //List containing all forces acting on the body
 
@@ -31,6 +33,8 @@ type Body(sh:Shape, ma:float, mat:Material, ?pos:Vector2D, ?vel:Vector2D, ?immo:
     member this.name = n
 
     member this.color = clr
+
+    member this.borderColor = bClr
 
     member this.position = p
 

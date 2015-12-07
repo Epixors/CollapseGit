@@ -15,9 +15,9 @@ type Pair =
 
 
 //The engine stores the bodies and governs all steps taken to modify them
-type Engine(bs:Body array, stopAt:float, txtBox:TextView) = 
+type Engine(bs:Body array, stopAt:float, ts:float, txtBox:TextView) = 
     let mutable bods = bs //List containing the bodies to be manipulated
-    let timestep = 0.02 //dt
+    let timestep = 1.0/60.0 //dt
     let mutable currentTime = 0.0 //Starting point in time
     let physics = new Physics(timestep)
     let collision = new Collision()
@@ -58,7 +58,7 @@ type Engine(bs:Body array, stopAt:float, txtBox:TextView) =
                     //Display the chart in a new window
                     (Chart.Line(dataToPrint, Title = name, XTitle = "Time (s)", YTitle = "Speed (m/s)")).ShowChart()
 
-        bods |> Array.iter(fun b -> physics.applyGravity(b))
+        bods |> Array.iter(fun b -> physics.applyGravity(b); physics.applyAirFriction(b))
         sortedPairs |> Array.iter(fun p -> collision.ResolveCollision(p.A, p.B))
         bods |> Array.iter(fun b -> physics.translateBody(b))
         currentTime <- currentTime + timestep

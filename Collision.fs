@@ -6,8 +6,8 @@ open System
 type Collision() = 
     //To prevent bodies from sinking into eachother due to floating point errors, positional correction has to be applied
     member this.PositionCorrection(a:Body, b:Body, m:Manifold) =
-        let degreeOfCorrection = 0.015 //How much the position is affected by positional correction
-        let threshold = 0.01 //Determines if correction should happen
+        let degreeOfCorrection = 3.0 //How much the position is affected by positional correction
+        let threshold = 0.001/100.0//Determines if correction should happen
 
         //Only let the correction happen when the penetration is over the threshold
         let correction =
@@ -19,8 +19,8 @@ type Collision() =
         let aModifier = if a.immovable then 0.0 else 1.0
         let bModifier = if b.immovable then 0.0 else 1.0
 
-        if a.immovable <> true then a.changePosition((correction * new Vector2D(bModifier, 1.0)) * a.inverseMass * -1.0)
-        if b.immovable <> true then b.changePosition((correction * new Vector2D(aModifier, 1.0)) * b.inverseMass)
+        if a.immovable <> true then a.changePosition((correction * new Vector2D(bModifier * a.velocity.x, 1.0)) * a.inverseMass * -1.0)
+        if b.immovable <> true then b.changePosition((correction * new Vector2D(aModifier * b.velocity.x, 1.0)) * b.inverseMass)
 
     //Check if two bodies are colliding and if so make sure they are separating
     member this.ResolveCollision(a:Body, b:Body) =
@@ -51,6 +51,8 @@ type Collision() =
 
                 this.PositionCorrection(a, b, manifold)
 
+                manifold.AABBvsAABB()
+
                 //Now adjust for friction
                 let relativeVelocityFriction = b.velocity - a.velocity
                 let tangentVectorPre = (relativeVelocityFriction - (manifold.normal * Vector2D.DotProduct( relativeVelocityFriction, manifold.normal)))
@@ -58,16 +60,17 @@ type Collision() =
                     | 0.0 -> tangentVectorPre
                     | _ -> tangentVectorPre.unit()
 
-                let jt = Vector2D.DotProduct(relativeVelocityFriction, tangentVector) * -1.0
+                if tangentVector <> Vector2D.get_Zero() then 
+                    let jt = Vector2D.DotProduct(relativeVelocityFriction, tangentVector) * -1.0
 
-                let u = (a.material.staticFriction + b.material.staticFriction) / 2.0
+                    let u = (a.material.staticFriction + b.material.staticFriction) / 2.0
 
-                if abs(jt) < j * u then
-                    let frictionImpulse = tangentVector * jt
-                    a.changeVelocity(frictionImpulse * a.inverseMass * -1.0)
-                    b.changeVelocity(frictionImpulse * b.inverseMass)
-                else
-                    let kineticFriction = (a.material.kineticFriction + b.material.kineticFriction) / 2.0
-                    let frictionImpulse = tangentVector * -j * kineticFriction
-                    a.changeVelocity(frictionImpulse * a.inverseMass * -1.0)
-                    b.changeVelocity(frictionImpulse * b.inverseMass)
+                    if abs(jt) < j * u then
+                        let frictionImpulse = tangentVector * jt
+                        a.changeVelocity(frictionImpulse * a.inverseMass * -1.0)
+                        b.changeVelocity(frictionImpulse * b.inverseMass)
+                    else
+                        let kineticFriction = (a.material.kineticFriction + b.material.kineticFriction) / 2.0
+                        let frictionImpulse = tangentVector * -j * kineticFriction
+                        a.changeVelocity(frictionImpulse * a.inverseMass * -1.0)
+                        b.changeVelocity(frictionImpulse * b.inverseMass)

@@ -9,8 +9,6 @@ C:\Users\klaas\Documents\Collapse\Collapse\bin\Debug\OpenTK.dll
 C:\Users\klaas\Documents\Collapse\Collapse\bin\Debug\OpenTK.xml
 C:\Users\klaas\Documents\CollapseGit\bin\Debug\Collapse.exe
 C:\Users\klaas\Documents\CollapseGit\bin\Debug\Collapse.pdb
-C:\Users\klaas\Documents\CollapseGit\bin\Debug\FSharp.Core.dll
-C:\Users\klaas\Documents\CollapseGit\bin\Debug\FSharp.Core.xml
 C:\Users\klaas\Documents\CollapseGit\bin\Debug\OpenTK.xml
 C:\Users\klaas\Documents\CollapseGit\obj\x86\Debug\Collapse.fsprojResolveAssemblyReference.cache
 C:\Users\klaas\Documents\CollapseGit\obj\x86\Debug\Collapse.exe
@@ -20,3 +18,18 @@ C:\Users\klaas\Documents\CollapseGit\bin\Debug\OxyPlot.dll
 C:\Users\klaas\Documents\CollapseGit\bin\Debug\OxyPlot.GtkSharp.dll
 C:\Users\klaas\Documents\CollapseGit\bin\Debug\FSharp.Charting.Gtk.pdb
 C:\Users\klaas\Documents\CollapseGit\bin\Debug\FSharp.Charting.Gtk.xml
+C:\Users\klaas\Documents\CollapseGit\bin\Debug\gdk-sharp.dll
+C:\Users\klaas\Documents\CollapseGit\bin\Debug\gdk-sharp.pdb
+C:\Users\klaas\Documents\CollapseGit\bin\Debug\atk-sharp.dll
+C:\Users\klaas\Documents\CollapseGit\bin\Debug\glade-sharp.dll
+C:\Users\klaas\Documents\CollapseGit\bin\Debug\glib-sharp.dll
+C:\Users\klaas\Documents\CollapseGit\bin\Debug\gtk-sharp.dll
+C:\Users\klaas\Documents\CollapseGit\bin\Debug\pango-sharp.dll
+C:\Users\klaas\Documents\CollapseGit\bin\Debug\FSharp.Core.dll
+C:\Users\klaas\Documents\CollapseGit\bin\Debug\Mono.Cairo.dll
+C:\Users\klaas\Documents\CollapseGit\bin\Debug\glib-sharp.pdb
+C:\Users\klaas\Documents\CollapseGit\bin\Debug\glade-sharp.pdb
+C:\Users\klaas\Documents\CollapseGit\bin\Debug\pango-sharp.pdb
+C:\Users\klaas\Documents\CollapseGit\bin\Debug\atk-sharp.pdb
+C:\Users\klaas\Documents\CollapseGit\bin\Debug\FSharp.Core.xml
+C:\Users\klaas\Documents\CollapseGit\bin\Debug\Collapse.exe.config

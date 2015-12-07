@@ -38,17 +38,16 @@ type Manifold =
                     //The bodies have overlap, determine the normal and penetration depth
                     this.overlap <- true
                     if xOverlap < yOverlap then
-                        if this.AtoB.x < 0.0 then
-                            this.normal <- new Vector2D(-1.0, 0.0)
-                        else
-                            this.normal <- new Vector2D(1.0, 0.0)
+                        match this.AtoB.x with
+                        | x when x < 0.0 -> this.normal <- new Vector2D(-1.0, 0.0)
+                        | _ -> this.normal <- new Vector2D(1.0, 0.0)
+
                         
                         this.penetration <- xOverlap
                     else
-                        if this.AtoB.y < 0.0 then
-                            this.normal <- new Vector2D(0.0 , -1.0)
-                        else
-                            this.normal <- new Vector2D(0.0, 1.0)
+                        match this.AtoB.y with
+                        | y when y < 0.0 -> this.normal <- new Vector2D(0.0, -1.0)
+                        | _ -> this.normal <- new Vector2D(0.0, 1.0)
 
                         this.penetration <- yOverlap
 
