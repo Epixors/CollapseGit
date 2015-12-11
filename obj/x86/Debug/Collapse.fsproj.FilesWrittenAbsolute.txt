@@ -7,3 +7,15 @@
 /home/pws1/Documents/CollapseGit/bin/Debug/OxyPlot.GtkSharp.dll
 /home/pws1/Documents/CollapseGit/bin/Debug/Collapse.exe.mdb
 /home/pws1/Documents/CollapseGit/obj/x86/Debug/Collapse.exe.mdb
+/home/pws1/Documents/CollapseGit/bin/Debug/Collapse.exe.config
+/home/pws1/Documents/CollapseGit/bin/Debug/FSharp.Core.dll
+/home/pws1/Documents/CollapseGit/bin/Debug/gdk-sharp.dll
+/home/pws1/Documents/CollapseGit/bin/Debug/atk-sharp.dll
+/home/pws1/Documents/CollapseGit/bin/Debug/cairo-sharp.dll
+/home/pws1/Documents/CollapseGit/bin/Debug/gio-sharp.dll
+/home/pws1/Documents/CollapseGit/bin/Debug/glib-sharp.dll
+/home/pws1/Documents/CollapseGit/bin/Debug/gtk-dotnet.dll
+/home/pws1/Documents/CollapseGit/bin/Debug/gtk-sharp.dll
+/home/pws1/Documents/CollapseGit/bin/Debug/pango-sharp.dll
+/home/pws1/Documents/CollapseGit/bin/Debug/OpenTK.GLControl.dll
+/home/pws1/Documents/CollapseGit/bin/Debug/OpenTK.xml

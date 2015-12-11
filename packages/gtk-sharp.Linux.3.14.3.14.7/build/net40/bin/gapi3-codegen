@@ -1,0 +1,2 @@
+#!/bin/sh
+mono --debug /tmp/build/net40/lib/gapi-3.0/gapi_codegen.exe "$@"

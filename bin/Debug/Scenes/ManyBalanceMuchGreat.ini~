@@ -69,13 +69,14 @@ material=0
 width=50
 height=50
 positionX=590
-positionY=50
+positionY=150
 color=Gold
+rotation=180
 [BalancePlank]
 mass=25
 material=0
 width=300
 height=50
 positionX=520
-positionY=150
+positionY=50
 color=Cyan

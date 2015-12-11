@@ -1,0 +1,13 @@
+prefix=${pcfiledir}/../..
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+assemblies_dir=${libdir}/mono/gtk-sharp-3.14
+gapidir=${prefix}/share/gapi-3.0
+
+Name: GIO#
+Description: GIO# - GIO .NET Binding
+Version: 3.14.0
+Cflags: -I:${gapidir}/gio-api.xml
+Libs: -r:${assemblies_dir}/gio-sharp.dll
+Requires: glib-sharp-3.0
+

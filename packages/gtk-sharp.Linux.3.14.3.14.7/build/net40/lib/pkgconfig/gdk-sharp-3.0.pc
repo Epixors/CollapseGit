@@ -1,0 +1,12 @@
+prefix=${pcfiledir}/../..
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+gapidir=${prefix}/share/gapi-3.0
+
+
+Name: Gdk#
+Description: Gdk# - GDK .NET Binding
+Version: 3.14.0
+Cflags: -I:${gapidir}/gdk-api.xml
+Libs: -r:${libdir}/mono/gtk-sharp-3.14/gdk-sharp.dll
+Requires: glib-sharp-3.0

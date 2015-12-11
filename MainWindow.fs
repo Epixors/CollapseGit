@@ -28,10 +28,9 @@ open System.IO
         let drawRectangle(b:Body) =
             let rectShape = b.shape :?> Collapse.Rectangle
 
-            let p = b.position - new Vector2D((rectShape.max.x - rectShape.min.x) / 2.0, (rectShape.max.y - rectShape.min.y) / 2.0)
-            let min = (rectShape.min + p) * scale
-            let max = (rectShape.max + p) * scale
-
+            let p = b.position
+            //0: bottom left, 1: bottom right, 2: top right, 3: top left (CCW)
+            let vertices = [| (p + rectShape.bottomLeft) * scale; (p + rectShape.bottomRight) * scale; (p + rectShape.topRight) * scale; (p + rectShape.topLeft) * scale|]
 
             GL.Begin(BeginMode.Quads)
            
@@ -39,10 +38,10 @@ open System.IO
 
             let borderSize = 1.0
 
-            GL.Vertex2(min.x - borderSize, min.y - borderSize)
-            GL.Vertex2(min.x - borderSize, max.y + borderSize)
-            GL.Vertex2(max.x + borderSize, max.y + borderSize)
-            GL.Vertex2(max.x + borderSize, min.y - borderSize)
+            GL.Vertex2(vertices.[0].x - borderSize, vertices.[0].y - borderSize) //bottom left
+            GL.Vertex2(vertices.[3].x - borderSize, vertices.[3].y + borderSize) //top left
+            GL.Vertex2(vertices.[2].x + borderSize, vertices.[2].y + borderSize) //top right
+            GL.Vertex2(vertices.[1].x + borderSize, vertices.[1].y - borderSize) //bottom right
 
             GL.End()
 
@@ -51,10 +50,10 @@ open System.IO
 
             GL.Color3(b.color)
 
-            GL.Vertex2(min.x + borderSize, min.y + borderSize)
-            GL.Vertex2(min.x + borderSize, max.y - borderSize)
-            GL.Vertex2(max.x - borderSize, max.y - borderSize)
-            GL.Vertex2(max.x - borderSize, min.y + borderSize)
+            GL.Vertex2(vertices.[0].x + borderSize, vertices.[0].y + borderSize) //bottom left
+            GL.Vertex2(vertices.[3].x + borderSize, vertices.[3].y - borderSize) //top left
+            GL.Vertex2(vertices.[2].x - borderSize, vertices.[2].y - borderSize) //top right
+            GL.Vertex2(vertices.[1].x - borderSize, vertices.[1].y + borderSize) //bottom right
 
             GL.End()
 
@@ -95,7 +94,7 @@ open System.IO
         let box = new VBox()
         let btnStart = new Button("Start")
 
-        let sceneFiles = Directory.GetFiles("Scenes\\")
+        let sceneFiles = Directory.GetFiles("Scenes/")
         let sceneBox = new ComboBox(sceneFiles)
         sceneBox.Active <- 0
 
@@ -132,7 +131,8 @@ open System.IO
             let materialList = [| new Material(0.2, 0.2, 0.3, 0.2) ; new Material(0.75, 0.5, 1.2, 0.05) ; new Material(0.01, 0.01, 0.25, 0.99); |]
             let mutable bodies = [||]
 
-            let data = (ParseIni.loadConfig(sceneBox.ActiveText))
+            let file = sceneBox.Active
+            let data = ParseIni.loadConfig(sceneFiles.[sceneBox.Active])
 
             for KeyValue(k, v) in data do
                 Log("Parsing data for body '" + k + "'")
@@ -147,6 +147,8 @@ open System.IO
                 let height = ref 0.0
                 let material = ref 1
                 let color = ref Color.White
+                let rot = ref 0.0
+                let rS = ref 0.0
 
                 v |> List.iter ( fun s -> (
                     match (fst s) with
@@ -161,12 +163,16 @@ open System.IO
                         | "name" -> name := (snd s)
                         | "velocityX" -> velX := (float)(snd s) / 100.0
                         | "velocityY" -> velY := (float)(snd s) / 100.0
+                        | "rotation" -> rot := (float)(snd s)
+                        | "rotationSpeed" -> rS := ((float)(snd s) * Math.PI) / 180.0
                 ))
 
 
-
-                let newRectangle = new Collapse.Rectangle(new Vector2D(0.0, 0.0), new Vector2D(!width, !height))
-                let newBody = new Body(newRectangle, !mass, materialList.[!material], pos = new Vector2D(!posX + !width/2.0, !posY + !height/2.0), vel = new Vector2D(!velX, !velY), immo = !immovable, col = !color, nm = !name)
+                //0: bottom left, 1: bottom right, 2: top right, 3: top left (CCW)
+                let vertices = [| new Vector2D(-(!width/2.0), -(!height/2.0)); new Vector2D((!width/2.0), -(!height/2.0)); new Vector2D((!width/2.0), (!height/2.0)); new Vector2D(-(!width/2.0), (!height/2.0)) |]
+                let newRectangle = new Collapse.Rectangle(vertices.[0], vertices.[1], vertices.[2], vertices.[3])
+                let newBody = new Body(newRectangle, !mass, materialList.[!material], !rot, !rS, new Vector2D(!posX, !posY), vel = new Vector2D(!velX, !velY), immo = !immovable, col = !color, nm = !name)
+                newBody.rotate(!rot)
 
                 bodies <- Array.append bodies [| newBody |]
 

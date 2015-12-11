@@ -23,14 +23,14 @@ type Manifold =
             let b = this.B.shape :?> Collapse.Rectangle
 
             //Determine if overlap is happening using SAT, see documentation for more details
-            let aExtentX = (a.max.x - a.min.x) / 2.0
-            let bExtentX = (b.max.x - b.min.x) / 2.0
+            let aExtentX = (a.bottomRight.x - a.bottomLeft.x) / 2.0
+            let bExtentX = (b.bottomRight.x - b.bottomLeft.x) / 2.0
 
             let xOverlap = aExtentX + bExtentX - abs(this.AtoB.x)
 
             if xOverlap > 0.0 then
-                let aExtentY = (a.max.y - a.min.y) / 2.0
-                let bExtentY = (b.max.y - b.min.y) / 2.0
+                let aExtentY = (a.topLeft.y - a.bottomLeft.y) / 2.0
+                let bExtentY = (b.topLeft.y - b.bottomLeft.y) / 2.0
 
                 let yOverlap = aExtentY + bExtentY - abs(this.AtoB.y)
 

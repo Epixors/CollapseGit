@@ -1,0 +1,12 @@
+prefix=${pcfiledir}/../..
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+gapidir=${prefix}/share/gapi-3.0
+
+
+Name: Gtk#
+Description: Gtk# - GNOME .NET Binding
+Version: 3.14.0
+Cflags: -I:${gapidir}/cairo-api.xml -I:${gapidir}/pango-api.xml -I:${gapidir}/atk-api.xml -I:${gapidir}/gtk-api.xml
+Libs: -r:${libdir}/mono/gtk-sharp-3.14/cairo-sharp.dll -r:${libdir}/mono/gtk-sharp-3.14/pango-sharp.dll -r:${libdir}/mono/gtk-sharp-3.14/atk-sharp.dll  -r:${libdir}/mono/gtk-sharp-3.14/gtk-sharp.dll
+Requires: glib-sharp-3.0 gio-sharp-3.0 gdk-sharp-3.0
