@@ -27,7 +27,7 @@ type Engine(bs:Body array, stopAt:float, ts:float, txtBox:TextView) =
     
     do bods |> Array.iter(fun b -> (for b2 in bods do if b2 <> b then pairs <- Array.append pairs [|(new Pair(b, b2))|]))
 
-    let sortedPairs =  (pairs |> Seq.ofArray |> Seq.distinctBy (fun elem -> new Pair(elem.B, elem.A)) |> Array.ofSeq)
+    let mutable sortedPairs =  (pairs |> Seq.ofArray |> Seq.distinctBy (fun elem -> new Pair(elem.B, elem.A)) |> Array.ofSeq)
 
 
     //Write to the TextView in the Control Panel
@@ -70,3 +70,4 @@ type Engine(bs:Body array, stopAt:float, ts:float, txtBox:TextView) =
     member this.addBody(b:Body) =
         if b.name <> "None" then velocityData.Add(b.name, [(currentTime, b.velocity.length());]) 
         bods <- Array.append bods [| b |]
+        bods |> Array.iter(fun b2 -> (sortedPairs <- Array.append sortedPairs [|(new Pair(b, b2))|]))

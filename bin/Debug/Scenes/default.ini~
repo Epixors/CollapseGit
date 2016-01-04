@@ -71,7 +71,6 @@ height=50
 positionX=125
 positionY=175
 color=Gold
-name=Gold
 [SilverBox]
 mass=25
 material=0
@@ -82,7 +81,6 @@ positionY=175
 velocityX=5
 velocityY=100
 color=Silver
-name=Silver
 rotation=0
 rotationSpeed=45
 [DiamondBox]
@@ -95,4 +93,3 @@ positionY=75
 velocityX=100
 velocityY=0
 color=Cyan
-name=Diamond

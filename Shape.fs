@@ -31,6 +31,9 @@ type Rectangle(bL:Vector2D, bR:Vector2D, tR:Vector2D, tL:Vector2D) =
         let tRR = new Vector2D(x.topRight.x * cosine - x.topRight.y * sine, x.topRight.x * sine + x.topRight.y * cosine)
 
         new Rectangle(bLR, bRR, tRR, tLR)
+   
+    member x.vertices = 
+        [ x.bottomLeft; x.bottomRight; x.topLeft; x.topRight ]
 
     override x.ShapeToString() = "rectangle"
 

@@ -8,6 +8,7 @@ open OpenTK.Graphics
 open OpenTK.Graphics.OpenGL
 open Collapse.ParseIni
 open System.IO
+open OpenTK.Input
 
     type Materials = Metal=0 | Wood=1 | Bouncy=2
 
@@ -19,11 +20,57 @@ open System.IO
 
         let engine = new Engine(scene, endSimTime, timestep, txtBox)
 
+        let mutable cornerA = new Vector2D(-100.0, -100.0)
+        let mutable cornerB = new Vector2D(-100.0, -100.0)
+        let mutable speed = new Vector2D(-100.0, -100.0)
 
         //Write to the TextView in the Control Panel
         let Log s =
             let iter = txtBox.Buffer.StartIter
             txtBox.Buffer.Insert((ref iter), "[" + System.DateTime.UtcNow.ToString("HH : mm : ss : ffff") + "] " + s + "\n")
+
+        let handleInput k =
+            if k.Equals(Key.B) then
+                let name = "None"
+                let mass = 10.0/100.0
+                let immovable = false
+                let posX = (cornerA.x + cornerB.x)/200.0
+                let posY = (cornerA.y + cornerB.y)/200.0
+                let velX = 0.0
+                let velY = 0.0
+                let width = abs(cornerB.x - cornerA.x) / 100.0
+                let height = abs(cornerB.y - cornerA.Y) / 100.0
+                let material = 1
+                let color = Color.White
+                let rot = 0.0
+                let rS = 0.0
+                               
+                let vertices = [| new Vector2D(-(width/2.0), -(height/2.0)); new Vector2D((width/2.0), -(height/2.0)); new Vector2D((width/2.0), (height/2.0)); new Vector2D(-(width/2.0), (height/2.0)) |]
+                let newRectangle = new Collapse.Rectangle(vertices.[0], vertices.[1], vertices.[2], vertices.[3])
+                let newBody = new Body(newRectangle, mass, materialList.[material], rot, rS, new Vector2D(posX, posY), vel = new Vector2D(velX, velY), immo = immovable, col = color, nm = name)
+
+                Log("Happy potato")
+
+                engine.addBody(newBody)
+
+            else 
+                Log("Sad potato")
+
+        let handleMouseInput(m:MouseButtonEventArgs) =
+
+            match m.Button with
+                | MouseButton.Left -> cornerA <- new Vector2D((float)(Mouse.GetState(0)).X, (float)(Mouse.GetState(0).Y))
+                | MouseButton.Right -> cornerB <- new Vector2D((float)m.Position.X, (float)m.Position.Y)
+                | MouseButton.Middle -> speed <- new Vector2D((float)m.Position.X, (float)m.Position.Y)
+
+            Log("A: " + cornerA.ToString() + " ; B: " + cornerB.ToString() + " ; speed: " + speed.ToString())
+
+        let handleKey =
+            new EventHandler<KeyboardKeyEventArgs>(fun sender eventargs -> (handleInput(eventargs.Key)))
+
+        let handleMouse =
+            new EventHandler<MouseButtonEventArgs>(fun sender eventargs -> handleMouseInput(eventargs))
+        
 
         let drawRectangle(b:Body) =
             let rectShape = b.shape :?> Collapse.Rectangle
@@ -57,6 +104,15 @@ open System.IO
 
             GL.End()
 
+            for f in b.previousForces do
+                GL.Begin(BeginMode.Lines)
+                GL.Color3(b.color)
+                let pC = p * scale
+                GL.Vertex2(pC.x, pC.y)
+                GL.Vertex2(pC.x + f.x * scale, pC.y + f.y * scale)
+
+                GL.End()
+
         //Enable VSync to prevent screen tearing
         do base.VSync <- VSyncMode.On
         do base.WindowBorder <- WindowBorder.Fixed
@@ -65,6 +121,10 @@ open System.IO
         override this.OnLoad e =
                 base.OnLoad e
                 GL.ClearColor(Color.Black)
+
+                this.Keyboard.KeyDown.AddHandler(handleKey)
+                this.Mouse.ButtonUp.AddHandler(handleMouse)
+        
 
         //Called when frame is resized, TO-DO: VIEWPORT
         override this.OnResize e = 
@@ -76,6 +136,11 @@ open System.IO
 
         override this.OnUpdateFrame e =
             base.OnUpdateFrame e
+
+            //Handle input
+            let mouseState = Mouse.GetState(0)
+            let keyboardState = Keyboard.GetState(0)
+
             engine.step()
                 
         //Called when a frame is ready to be drawn
@@ -83,6 +148,16 @@ open System.IO
             GL.Clear(ClearBufferMask.ColorBufferBit)
 
             for b in engine.bodies do drawRectangle(b)
+
+            GL.PointSize((float32)10.0)
+            GL.Begin(BeginMode.Points)
+            GL.Color3(Color.White)
+
+            GL.Vertex2(cornerA.x, cornerA.y)
+            GL.Vertex2(cornerB.x, cornerB.y)
+            GL.Vertex2(speed.x, speed.y)
+
+            GL.End()
 
             this.Context.SwapBuffers()
 
@@ -189,13 +264,17 @@ open System.IO
                 }
 
         btnStart.Clicked.AddHandler(fun s a -> Async.Start(StartEngine true))
+        sceneBox.Changed.AddHandler(fun s a -> Log("Selected: " + sceneFiles.[sceneBox.Active]))
 
 
         type MyWindow() as this =
             inherit Window("Collapse Engine - Control Panel")
           
+
             //Create the window and it's children
             do this.SetDefaultSize(400,250)
+            do this.BorderWidth <- (uint32) 0
+
             do this.DeleteEvent.AddHandler(fun o e -> this.OnDeleteEvent(o,e))
             do box.PackStart(btnStart, false, false, (uint32 0))
             do box.PackStart(sceneBox, false, false, (uint32 0))
@@ -205,7 +284,7 @@ open System.IO
 
 
             //Show the starting message
-            do ["Hola!"; "To begin, select a scene" ; "Press Start to start simulating a scene" ; "Currently loaded: Default Scene"] |> List.iter(fun s -> Log s)
+            do ["Hola!"; "To begin, select a scene" ; "Press Start to start simulating a scene" ; "Selected: " + sceneFiles.[sceneBox.Active] ] |> List.iter(fun s -> Log s)
 
             //Show the window
             do this.ShowAll()

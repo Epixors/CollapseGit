@@ -24,6 +24,7 @@ type Body(sh:Shape, ma:float, mat:Material, rot:float, rotSpeed:float, pos:Vecto
     let mutable p = pos //Stores the position in the scene
     let mutable v = defaultArg vel (new Vector2D(0.0, 0.0)) //Stores the body's velocity
     let mutable f = [] //List containing all forces acting on the body
+    let mutable pF = [] //List containg forces from last step for debugging
 
     let mutable r = (rot * Math.PI)/180.0
     let mutable t = 0.0
@@ -64,6 +65,8 @@ type Body(sh:Shape, ma:float, mat:Material, rot:float, rotSpeed:float, pos:Vecto
 
     member this.totalForce = f |> List.sum
 
+    member this.previousForces = pF
+
 
     (* These members provide functions to change internal values *)
 
@@ -77,6 +80,7 @@ type Body(sh:Shape, ma:float, mat:Material, rot:float, rotSpeed:float, pos:Vecto
         f <- f2::f
 
     member this.clearForces() =
+        pF <- f
         f <- []
 
     member this.rotate(d:float) =

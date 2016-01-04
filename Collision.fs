@@ -6,7 +6,7 @@ open System
 type Collision() = 
     //To prevent bodies from sinking into eachother due to floating point errors, positional correction has to be applied
     member this.PositionCorrection(a:Body, b:Body, m:Manifold) =
-        let degreeOfCorrection = 3.0 //How much the position is affected by positional correction
+        let degreeOfCorrection = 0.8 //How much the position is affected by positional correction
         let threshold = 0.001/100.0//Determines if correction should happen
 
         //Only let the correction happen when the penetration is over the threshold
@@ -25,9 +25,10 @@ type Collision() =
     //Check if two bodies are colliding and if so make sure they are separating
     member this.ResolveCollision(a:Body, b:Body) =
         let mutable manifold = new Manifold(a, b)
-        manifold.AABBvsAABB()
+        manifold.OBBvsOBB()
 
         if manifold.overlap then
+            manifold.AABBvsAABB()
             let relativeVelocity = b.velocity - a.velocity
 
             //Velocity along the collision normal, if it's > 0 the bodies are separating
@@ -46,12 +47,13 @@ type Collision() =
                 let impulse = manifold.normal * j
 
 
+
+
                 a.changeVelocity(impulse * a.inverseMass * -1.0)
                 b.changeVelocity(impulse * b.inverseMass) 
 
                 this.PositionCorrection(a, b, manifold)
 
-                manifold.AABBvsAABB()
 
                 //Now adjust for friction
                 let relativeVelocityFriction = b.velocity - a.velocity
