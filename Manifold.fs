@@ -69,18 +69,18 @@ type Manifold =
             //Create an empty list to store the vertices for the Minkowski Difference
             let mutable minkowskiDifference = []
 
-
-            let computeCentroid (points: Vector2D list) =       
-                let x = (points |> List.sumBy(fun x -> x.x))/(float)points.Length
-                let y = (points |> List.sumBy(fun x -> x.y))/(float)points.Length
-                new Vector2D(x, y)
-
             //Create the Minkowski Difference
             for aVert in aVerts do
                 for bVert in bVerts do
                     minkowskiDifference <- (aVert - bVert)::minkowskiDifference
 
             
+
+            let computeCentroid (points: Vector2D list) =       
+                let c = List.fold(fun acc x -> acc + x) (Vector2D.get_Zero()) points
+                c/(float)points.Length
+
+
 
             let clockwise (p1:Vector2D) (p2:Vector2D) (p3:Vector2D) =
                 (p2.X - p1.X) * (p3.Y - p1.Y) - (p2.Y - p1.Y) * (p3.X - p1.X) < 1e-9
@@ -100,20 +100,6 @@ type Manifold =
                 |> List.fold fill []
                 |> List.rev
 
-            let lineIntersectionPoint(rayStart:Vector2D, rayEnd:Vector2D, lineStart:Vector2D, lineEnd:Vector2D) =
-                let A1 = rayEnd.y - rayStart.y
-                let B1 = rayStart.x - rayEnd.x
-                let C1 = A1 * rayStart.x + B1 * rayStart.y
-
-                let A2 = lineEnd.y - lineStart.y
-                let B2 = lineStart.x - lineEnd.x
-                let C2 = A2 * lineStart.x + B2 * lineStart.y
-
-                let delta = A1 * B2 - A2 * B1
-
-                match delta with
-                | 0.0 -> rayStart
-                | _ -> new Vector2D( (B2*C1 - B1*C2)/delta, (A1*C2 - A2*C1)/delta)
 
             let test = ref "Execute[{"
             a.vertices |> List.iter( fun x -> test := !test + "\"(" + x.x.ToString() + ", " + x.y.ToString() + ")\",")
@@ -150,22 +136,99 @@ type Manifold =
                 i <- i + 1
 
             if c then
-                //There is an overlap thus we can find an intersection between the ray cast from the center of the MDP in the direction of the origin to determine penetration depth
-                let rayStart = minkowskiCenter
-                let rayEnd = (Vector2D.get_Zero() - minkowskiCenter) * 1000000.0//Multiplied to be certain the ray goes outside of the MDP
 
+                //Determines where intersection happens on two line segments l and m defined by A-B and C-D
+                let intersectSegments(l:(Vector2D * Vector2D * int), m:(Vector2D * Vector2D * int)) =
+                    let mutable A, B, _ = l
+                    let mutable C, D, _ = m
 
-                let mDCopy = minkowskiDifference
-                let index = ref -1
-                let mDLines : (Vector2D * Vector2D) list = mDCopy |> List.map(fun x ->
-                     index := !index + 1
-                     if (!index < mDCopy.Length-1) then (x, mDCopy.[!index + 1]) else (x,mDCopy.[0]))
+                    let standard = (new Vector2D(System.Double.MinValue, System.Double.MaxValue), l, m)
 
-                let point = ref rayStart
+                    if A.x = B.x && A.y = B.y || C.x = D.x && C.y = D.y then
+                        standard
+                    else 
+                        B <- B - A
+                        C <- C - A
+                        D <- D - A
 
-                mDLines |> List.iter(fun x -> if lineIntersectionPoint(rayStart, rayEnd, fst x, snd x) <> rayStart then point := lineIntersectionPoint(rayStart, rayEnd, fst x, snd x))
+                        let distAB = B.length()
 
-                let penetrationDepth = abs((Vector2D.get_Zero() - !point).length())
+                        let cos = B.x/distAB
+                        let sin = B.y/distAB
+
+                        let newCX = C.x * cos + C.y * sin
+                        C <- new Vector2D(newCX, C.y * cos - C.x * sin)
+                        let newDX = D.x * cos + D.y * sin
+                        D <- new Vector2D(newDX, D.y * cos - D.x * sin)
+
+                        if C.y < 0.0 && D.y < 0.0 || C.y >= 0.0 && D.y >= 0.0 then
+                            standard
+                        else
+                            let ABpos = D.x + (C.x - D.x) * D.y / (D.y - C.y)
+                            if ABpos < 0.0 || ABpos > distAB then
+                                standard
+                            else
+                                (new Vector2D(A.x + ABpos * cos, A.y + ABpos * sin), l, m)
+
+                //Creates a collection of line segments for body A
+                let aIndex = ref -1
+                let aLines : (Vector2D * Vector2D * int) list = aVerts |> List.map(fun x ->
+                     aIndex := !aIndex + 1
+                     if (!aIndex < aVerts.Length-1) then (x, aVerts.[!aIndex + 1], !aIndex) else (x,aVerts.[0], !aIndex))
+
+                //Creates a collection of line segments for body B
+                let bIndex = ref -1
+                let bLines : (Vector2D * Vector2D * int) list = bVerts |> List.map(fun x ->
+                     bIndex := !bIndex + 1
+                     if (!bIndex < bVerts.Length-1) then (x, bVerts.[!bIndex + 1], !bIndex) else (x,bVerts.[0], !bIndex))
+
+                //Stores found intersections
+                let intersects = ref []
+
+                aLines |> List.iter(fun x -> bLines |> List.iter(fun y -> intersects :=  (intersectSegments(x, y))::!intersects ))
+
+                let standard = new Vector2D(System.Double.MinValue, System.Double.MaxValue)
+
+                //Filters out the non-intersections
+                intersects := !intersects |> List.filter(fun x ->
+                    let a, _, _ = x
+                    a <> standard)
+
+                //Stores the lines in body A that are intersecting with body B
+                let mutable aLines = []
+               
+                //Fills aLines with the lines from found intersections
+                for intersect in !intersects do
+                  (*
+                    3 ---- 2 ---- 2
+                    |             |
+                    |             |
+                    3             1             
+                    |             |
+                    |             |
+                    0 ---- 0 ---- 1
+                  *)
+
+                    //Determines which line is intersecting
+                    let intersectPoint, (_,_,lineAIndex), (_, _,lineBIndex) = intersect
+                    let lineA = match lineAIndex with
+                                    | 0 -> (aVerts.[1] , aVerts.[0], 0)
+                                    | 1 -> (aVerts.[2] , aVerts.[1], 0)
+                                    | 2 -> (aVerts.[3] , aVerts.[2], 0)
+                                    | 3 -> (aVerts.[3] , aVerts.[0], 0)
+
+                    printfn "A%i intersected with B%i" lineAIndex lineBIndex
+
+                   
+                    aLines <- lineA::aLines
+
+                let standardTwo = (standard, (standard, standard, 0), (standard, standard, 0))
+                let mutable endPoint, _, _ = if aLines.Length >= 2 then intersectSegments(aLines.[0], aLines.[1]) else standardTwo
+
+                if aLines.Length >= 2 && endPoint = standard then
+                    let endPointTwo,_,_ = intersectSegments(aLines.[1], aLines.[0])
+                    endPoint <- endPointTwo
+
 
                 let collisionNormal = (Vector2D.get_Zero() - minkowskiCenter).unit()
                 let xModifier = if (collisionNormal.x < 0.0) then -1.0 else 1.0
@@ -176,7 +239,7 @@ type Manifold =
                     | _ -> this.normal <- new Vector2D(0.0, 1.0 * yModifier)
 
                 this.overlap <- true
-                this.penetration <- penetrationDepth
+                this.penetration <- 0.01
 
                 if this.A.immovable <> this.B.immovable && (this.A.name <> "None" && this.B.name <> "None") then
                     printfn " == COLLISION DATA == "
@@ -189,14 +252,12 @@ type Manifold =
                     printfn " == CONVEX HULL POINTS == "
                     minkowskiDifference |> List.iter ( fun x -> printfn "%s" (x.ToString()))
 
-                    printfn " == CONVEX HULL SEGMENTS == "
-                    mDLines |> List.iter( fun x -> printfn "Start: %s || End: %s" (((fst)(x)).ToString()) (((snd)(x)).ToString()))
-
                     printfn " == CONVEX HULL CENTER == "
                     printfn "%s" (minkowskiCenter.ToString())
 
                     printfn " == INTERSECT POINT == "
-                    printfn "Point: %s || Depth: %f " ((!point).ToString()) penetrationDepth
+                    !intersects |> List.iter(fun x -> printfn "%s" (x.ToString()))
+                    printfn "End Point: %s" (endPoint.ToString())
 
                     printfn " == COLLISION NORMAL == "
                     printfn "%s" (this.normal.ToString())
@@ -205,10 +266,10 @@ type Manifold =
 
                     let commands = ref "Execute[{"
 
-                    a.vertices |> List.iter( fun x -> commands := !commands + "\"(" + x.x.ToString() + ", " + x.y.ToString() + ")\",")
+                    aVerts |> List.iter( fun x -> commands := !commands + "\"(" + x.x.ToString() + ", " + x.y.ToString() + ")\",")
                     commands := !commands + "\"Polygon[A,B,D,C]\","
 
-                    b.vertices |> List.iter( fun x -> commands := !commands + "\"(" + x.x.ToString() + ", " + x.y.ToString() + ")\",")
+                    bVerts |> List.iter( fun x -> commands := !commands + "\"(" + x.x.ToString() + ", " + x.y.ToString() + ")\",")
                     commands := !commands + "\"Polygon[E,F,H,G]\","
 
                     minkowskiDifference|> List.iter( fun x -> commands := !commands + "\"(" + x.x.ToString() + ", " + x.y.ToString() + ")\",")
@@ -227,6 +288,7 @@ type Manifold =
                     printfn "Paste into GeoGebra's command line to create the scene"
 
                     printfn " == END DATA SEGMENT == "
+        
 
 
     end

@@ -9,15 +9,17 @@ type Shape() =
     abstract member ShapeToString : unit -> string
     override x.ToString() = x.ShapeToString()
 
-//Describes an AABB
+//Describes a (bounding) box
 type Rectangle(bL:Vector2D, bR:Vector2D, tR:Vector2D, tL:Vector2D) = 
     inherit Shape()
 
+    //Vectors defining the 4 corners
     member x.bottomLeft = bL
     member x.bottomRight = bR
     member x.topLeft = tL
     member x.topRight = tR
 
+    //Rotates all vectors by the given angle and returns a new rectangle
     member x.rotate(angle) = 
         let sine = sin(angle)
         let cosine = cos(angle)
@@ -30,13 +32,20 @@ type Rectangle(bL:Vector2D, bR:Vector2D, tR:Vector2D, tL:Vector2D) =
         let tLR = new Vector2D(x.topLeft.x * cosine - x.topLeft.y * sine, x.topLeft.x * sine + x.topLeft.y * cosine)
         let tRR = new Vector2D(x.topRight.x * cosine - x.topRight.y * sine, x.topRight.x * sine + x.topRight.y * cosine)
 
+
         new Rectangle(bLR, bRR, tRR, tLR)
-   
+
+    //Returns the vertices as a list
     member x.vertices = 
         [ x.bottomLeft; x.bottomRight; x.topLeft; x.topRight ]
 
-    override x.ShapeToString() = "rectangle"
+    //Calculates the x- and y-axis in model space and returns them as a list
+    member x.axes =
+        [(x.bottomRight - x.bottomLeft)/(x.bottomRight - x.bottomLeft).lengthSq(); (x.topLeft - x.bottomLeft)/(x.topLeft - x.bottomLeft).lengthSq() ]
 
 
+    override x.ShapeToString() =
+        let message = List.fold( fun acc x -> acc + " , " + x.ToString()) "rect: " x.vertices
+        message
 
      

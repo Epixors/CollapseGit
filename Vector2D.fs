@@ -18,6 +18,7 @@ type Vector2D =
         static member (/) (a:Vector2D, s:float) = a * (1.0/s)
         static member get_Zero() = new Vector2D(0.0, 0.0) //Required for List.sum
         static member DotProduct(a:Vector2D, b:Vector2D) = a.X * b.X + a.Y * b.Y
+        static member CrossProduct(a:Vector2D, b:Vector2D) = a.X * b.Y - a.Y * b.X
 
         //These member functions give some tools to modify/gain information about the vector
         member this.lengthSq() = this.x * this.x + this.y * this.y //Gives the length squared (sqrt not always needed, improves performance)

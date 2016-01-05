@@ -85,5 +85,6 @@ type Body(sh:Shape, ma:float, mat:Material, rot:float, rotSpeed:float, pos:Vecto
 
     member this.rotate(d:float) =
         r <- r + ((d * Math.PI)/180.0)
-        s <- s.rotate(r + d)
+        s <- s.rotate(r)
+
     
